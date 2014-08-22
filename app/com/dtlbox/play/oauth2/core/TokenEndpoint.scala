@@ -45,20 +45,12 @@ class TokenEndpoint[C <: Client, R <: ResourceOwner](clientService: ClientServic
    * @param grant grant, extracted from incoming request by [[GrantConsumer]]
    * @return future token or error.
    */
-  private def consumeGrant(grant: Grant[R]): Future[Either[OAuth2Error, AccessToken[R]]] = {
+  private def issueAccessToken(grant: Grant[R]): Future[Either[OAuth2Error, AccessToken[R]]] = {
     val grantInfo = GrantInfo[R](grant.id, grant.grantType, grant.resourceOwnerId, grant.clientId)
 
-    def err = OAuth2Error.InvalidGrant()
-
-    tokenService.retrieveByGrantInfo(grantInfo).flatMap {
-      case Some(token) =>
-        if (!token.isRevoked) tokenService.revoke(token)
-        Future(Left(err))
-      case None =>
-        tokenService
-          .create(grantInfo, grant.scope)
-          .map(Right(_))
-    }
+    tokenService
+      .create(grantInfo, grant.scope)
+      .map(Right(_))
   }
 
   /**
@@ -70,7 +62,7 @@ class TokenEndpoint[C <: Client, R <: ResourceOwner](clientService: ClientServic
    */
   def obtainAccessToken = GrantAction.async { implicit request =>
 
-    consumeGrant(request.grant)
+    issueAccessToken(request.grant)
       .map {
         case Left(error) => renderAsBody(StatusCodes.BAD_REQUEST, error)
         case Right(token) => renderAsBody(StatusCodes.OK, token)

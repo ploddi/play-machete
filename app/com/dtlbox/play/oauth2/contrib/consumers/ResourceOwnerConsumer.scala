@@ -57,7 +57,7 @@ class ResourceOwnerConsumer[R <: ResourceOwner](resourceOwnerService: ResourceOw
       password <- params.get(ResourceOwnerConsumer.Password)
     } yield (username, password)) match {
       case Some((username, password)) => credentials(username, password, request.client.id, scope)
-      case None => Future(Left(OAuth2Error.InvalidGrant()))
+      case None => Future(Left(OAuth2Error.InvalidGrant(Option("request has to specify username and password"))))
     }
 
   }
