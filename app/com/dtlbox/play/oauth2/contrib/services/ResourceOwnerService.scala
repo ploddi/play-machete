@@ -7,4 +7,8 @@ trait ResourceOwnerService[R <: ResourceOwner] {
 
   def retrieve(ownerId: R#Id): Future[Option[R]]
 
+  def retrieveByUsername(username: String): Future[Option[R]]
+
+  def matchPassword(resourceOwner: R, suppliedPassword: String): Future[Boolean]
+
 }
