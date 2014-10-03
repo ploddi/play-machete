@@ -15,6 +15,8 @@ import scala.concurrent.Future
 abstract class SMSCodeGrantService[R <: ResourceOwner](smsGate: SMSGateService)
  extends GrantService[R, SMSCodeGrant[R]] {
 
+  protected def messageForGrant(grant: SMSCodeGrant[R]): String = s"Код подверждения: ${grant.smsCode}"
+
   /**
    * Inner [[GrantService]]
    */
@@ -43,7 +45,7 @@ abstract class SMSCodeGrantService[R <: ResourceOwner](smsGate: SMSGateService)
    * @return future grant
    */
   def create(grant: SMSCodeGrant[R]) = {
-    val msg = s"Код подверждения: ${grant.smsCode}"
+    val msg = messageForGrant(grant)
 
     grantService
       .create(grant)
