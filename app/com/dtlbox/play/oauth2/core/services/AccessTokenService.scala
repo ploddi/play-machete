@@ -1,7 +1,9 @@
 package com.dtlbox.play.oauth2.core.services
 
+import java.security.SecureRandom
+
 import com.dtlbox.play.oauth2.contrib.grants.RefreshToken
-import com.dtlbox.play.oauth2.core.{ResourceOwner, AccessToken, GrantInfo}
+import com.dtlbox.play.oauth2.core.{TokenGeneration, ResourceOwner, AccessToken, GrantInfo}
 import play.api.libs.Crypto
 import play.api.libs.concurrent.Execution.Implicits._
 import scala.concurrent.Future
@@ -11,7 +13,10 @@ import scala.concurrent.Future
  *
  * @param refreshTokenService [[GrantService]] for refresh tokens creation
  */
-abstract class AccessTokenService[R <: ResourceOwner](refreshTokenService: GrantService[R, RefreshToken[R]]) {
+abstract class AccessTokenService[R <: ResourceOwner](refreshTokenService: GrantService[R, RefreshToken[R]])
+  extends TokenGeneration {
+
+  protected val random = new SecureRandom()
 
   /** A period during which token is valid */
   val tokenLifeTimeSeconds: Long
@@ -65,10 +70,10 @@ abstract class AccessTokenService[R <: ResourceOwner](refreshTokenService: Grant
    */
   def create(grantInfo: GrantInfo[R], scope: Option[String] = None): Future[AccessToken[R]] = {
 
-    val refreshToken = RefreshToken(Crypto.generateToken, grantInfo.clientId, grantInfo.resourceOwnerId, scope)
+    val refreshToken = RefreshToken(generateToken(), grantInfo.clientId, grantInfo.resourceOwnerId, scope)
 
     val accessToken = AccessToken(
-      id = Crypto.generateToken,
+      id = generateToken(),
       grantInfo = grantInfo,
       expires = System.currentTimeMillis() / 1000 + tokenLifeTimeSeconds,
       expiresIn = tokenLifeTimeSeconds,
