@@ -47,16 +47,12 @@ abstract class SMSCodeGrantService[R <: ResourceOwner](smsGate: SMSGateService)
   def create(grant: SMSCodeGrant[R]) = {
     val msg = messageForGrant(grant)
 
-    grantService
-      .create(grant)
-      .flatMap { g =>
-        smsGate
-          .send(msg, g.phoneNumber)
-          .flatMap {
-            case SMSGateResponseStatuses.Ok => Future.successful(g)
-            case e: SMSGateResponseStatuses.Error => Future.failed(e)
-          }
-    }
+    smsGate
+      .send(msg, grant.phoneNumber)
+      .flatMap {
+        case SMSGateResponseStatuses.Ok => grantService.create(grant)
+        case e: SMSGateResponseStatuses.Error => Future.failed(e)
+      }
   }
 
   def retrieve(id: String) = grantService.retrieve(id)
