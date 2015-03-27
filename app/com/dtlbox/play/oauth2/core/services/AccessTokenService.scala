@@ -4,7 +4,6 @@ import java.security.SecureRandom
 
 import com.dtlbox.play.oauth2.contrib.grants.RefreshToken
 import com.dtlbox.play.oauth2.core.{TokenGeneration, ResourceOwner, AccessToken, GrantInfo}
-import play.api.libs.Crypto
 import play.api.libs.concurrent.Execution.Implicits._
 import scala.concurrent.Future
 

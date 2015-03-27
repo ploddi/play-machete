@@ -29,7 +29,7 @@ object SMSCodeGrant {
   val RefreshToken = "refresh_token"
   val Scope = "scope"
 
-  implicit def toParams[R <: ResourceOwner](smsCode: SMSCodeGrant[R]) = Map(
+  implicit def toParams[R <: ResourceOwner](smsCode: SMSCodeGrant[R]): Map[String, Seq[String]] = Map(
     RequestToken -> Seq(smsCode.id),
     Scope -> smsCode.scope.toSeq)
 
